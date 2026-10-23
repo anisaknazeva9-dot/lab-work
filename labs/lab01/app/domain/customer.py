@@ -1,16 +1,9 @@
-# ЛР1: поля, конструктор и служебные проверки даны преподавателем.
-# Завершите отмеченные методы; API пока использует старые функции.
-from app.support.types import CheckResult, checked, identifier, choice, boolean, date_only, Repository
-from app.support.types import name as valid_name, country as valid_country
+from app.support.types import CheckResult
 from app.support.errors import DomainError
 
 
 class Customer:
     def __init__(self, customer_id, name, category, online_consent=False):
-        identifier(customer_id)
-        name = valid_name(name)
-        choice(category, ("STANDARD", "PREMIUM", "BUSINESS"), "INVALID_CATEGORY")
-        boolean(online_consent)
         self._customer_id = customer_id
         self._name = name
         self._category = category
@@ -38,18 +31,24 @@ class Customer:
         return self._status
 
     def block(self):
+        if self._status != "ACTIVE":
+            raise DomainError("INVALID_STATE")
         self._status = "BLOCKED"
 
     def activate(self):
+        if self._status != "BLOCKED":
+            raise DomainError("INVALID_STATE")
         self._status = "ACTIVE"
 
     def close(self):
-        if self.status not in ('ACTIVE', 'BLOCKED'):
+        if self._status not in ("ACTIVE", "BLOCKED"):
             raise DomainError("INVALID_STATE")
         self._status = "CLOSED"
 
     def availability(self):
-        return self._status == "ACTIVE"
-
-    def describe(self):
-        return f"{self._customer_id}:{self._name}:{self._status}"
+        if self._status == "ACTIVE":
+            return CheckResult(True)
+        if self._status == "BLOCKED":
+            return CheckResult(False, "CUSTOMER_BLOCKED")
+        if self._status == "CLOSED":
+            return CheckResult(False, "CUSTOMER_CLOSED")
