@@ -24,7 +24,15 @@ class CustomerService:
 
     def check(self, key, context):
         customer = self.get(key)
-        return customer.availability()
+        
+        availability = customer.availability()
+        if not availability.allowed:
+            return availability
+        if customer.category not in ("STANDARD", "PREMIUM"):
+            return CheckResult(False, "CUSTOMER_CATEGORY_DENIED")
+        if context.operation_type != "PURCHASE":
+            return CheckResult(False, "OPERATION_DENIED")
+        return CheckResult(True)
 
 
 def make_entity(*args, **kwargs):
