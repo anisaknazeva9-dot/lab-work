@@ -1,9 +1,15 @@
-from app.support.types import CheckResult
+from app.support.types import CheckResult, identifier, choice, boolean
+from app.support.types import name as valid_name
 from app.support.errors import DomainError
 
 
 class Customer:
     def __init__(self, customer_id, name, category, online_consent=False):
+        identifier(customer_id)
+        valid_name(name)
+        choice(category, ("STANDARD", "PREMIUM", "BUSINESS"), "INVALID_CATEGORY")
+        boolean(online_consent)
+
         self._customer_id = customer_id
         self._name = name
         self._category = category
