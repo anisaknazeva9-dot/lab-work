@@ -32,9 +32,10 @@ class CustomerService:
             return availability
             
         for rule in self._rules:
-            result = rule.check(customer, context)
-            if not result.allowed:
-                return result
+          result = rule.check(customer, context)
+          result = checked(result)
+          if not result.allowed:
+            return result
                 
         return CheckResult(True)
 
